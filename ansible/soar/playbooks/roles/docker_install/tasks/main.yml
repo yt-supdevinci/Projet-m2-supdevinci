@@ -1,0 +1,5 @@
+# roles/docker_install/tasks/main.yml
+- name: Installer Docker via le script officiel
+  shell: curl -fsSL {{ docker_install_script_url }} | sh
+  args:
+    executable: /bin/bash

@@ -1,0 +1,38 @@
+# roles/shuffle/tasks/main.yml
+- name: Installer les dépendances nécessaires
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: yes
+
+- name: Cloner le dépôt Shuffle
+  git:
+    repo: https://github.com/Shuffle/Shuffle.git
+    dest: /opt/Shuffle
+
+- name: Créer le répertoire shuffle-database
+  file:
+    path: /opt/Shuffle/shuffle-database
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: '0755'
+
+- name: Désactiver le swap
+  command: swapoff -a
+
+- name: Démarrer Shuffle avec Docker Compose
+  shell: docker compose up -d
+  args:
+    chdir: /opt/Shuffle
+
+- name: Configurer vm.max_map_count
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: yes

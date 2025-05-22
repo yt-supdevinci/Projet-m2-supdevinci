@@ -1,0 +1,108 @@
+---
+- name: Install or reinstall all Wazuh components (Manager, Indexer, Dashboard)
+  hosts: aio
+  become: yes
+  gather_facts: true
+  tasks:
+#    - name: Download Wazuh GPG key using curl
+#      ansible.builtin.command: >
+#        curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH -o /usr/share/keyrings/wazuh.gpg
+#      args:
+#        creates: /usr/share/keyrings/wazuh.gpg
+
+#    - name: Set permissions on Wazuh GPG key
+#      ansible.builtin.file:
+#        path: /usr/share/keyrings/wazuh.gpg
+#        mode: '0777'
+
+#    - name: Convert GPG key to binary format
+#      ansible.builtin.command: >
+#        gpg --dearmor -o /usr/share/keyrings/wazuh.gpg /tmp/GPG-KEY-WAZUH
+#      args:
+#        creates: /usr/share/keyrings/wazuh.gpg
+
+    - name: Add Wazuh APT repository using signed-by
+      ansible.builtin.apt_repository:
+        repo: "deb [trusted=yes] https://packages.wazuh.com/4.x/apt stable main"
+#        repo: "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt stable main"
+        filename: wazuh
+        state: present
+
+
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+
+    - name: Install required dependencies
+      apt:
+        name:
+          - curl
+          - sudo
+          - apt-transport-https
+          - gnupg
+        state: present
+        update_cache: yes
+
+    - name: Remove previous Wazuh install script if it exists
+      ansible.builtin.file:
+        path: /tmp/wazuh-install.sh
+        state: absent
+
+    - name: Download the Wazuh installation script using wget
+      ansible.builtin.command: >
+        wget https://packages.wazuh.com/4.12/wazuh-install.sh -O /tmp/wazuh-install.sh
+      args:
+        creates: /tmp/wazuh-install.sh
+
+    - name: Ensure Wazuh install script is executable
+      ansible.builtin.file:
+        path: /tmp/wazuh-install.sh
+        mode: '0755'
+
+    - name: Run the Wazuh installation script (All-in-One) with overwrite option
+      command: /bin/bash /tmp/wazuh-install.sh -a -o
+      args:
+        chdir: /tmp
+      register: installation_output
+
+    - name: Display installation output
+      debug:
+        var: installation_output.stdout_lines
+
+    - name: Save installation output to a file on the remote machine
+      copy:
+        content: "{{ installation_output.stdout }}"
+        dest: "/root/wazuh_installation_output.txt"
+        mode: '0600'
+
+    - name: Fetch the installation output file to Ansible controller
+      fetch:
+        src: "/root/wazuh_installation_output.txt"
+        dest: "./wazuh_installation_output.txt"
+        flat: yes
+
+    - name: Remove the Wazuh installation script after execution
+      file:
+        path: /tmp/wazuh-install.sh
+        state: absent
+    - name: Ensure Wazuh manager service is started and enabled
+      systemd:
+        name: wazuh-manager
+        state: started
+        enabled: yes
+    - name: Ensure Wazuh dashboard service is started and enabled
+      systemd:
+        name: wazuh-dashboard
+        state: started
+        enabled: yes
+    - name: Ensure Wazuh indexer service is started and enabled
+      systemd:
+        name: wazuh-indexer
+        state: started
+        enabled: yes
+
+    - name: Check if Wazuh manager is running
+      command: systemctl is-active wazuh-manager
+      register: wazuh_manager_status
+      changed_when: false
+      failed_when: wazuh_manager_status.stdout != "active"

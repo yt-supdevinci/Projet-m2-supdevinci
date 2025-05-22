@@ -1,0 +1,36 @@
+# roles/dfir_iris/tasks/main.yml
+- name: Installer les dépendances nécessaires
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: yes
+
+- name: Cloner le dépôt iris-web
+  git:
+    repo: https://github.com/dfir-iris/iris-web.git
+    dest: /opt/iris-web
+
+- name: Se positionner sur la version v2.4.20
+  shell: git checkout v2.4.20
+  args:
+    chdir: /opt/iris-web
+
+- name: Copier le fichier .env.model vers .env
+  copy:
+    src: /opt/iris-web/.env.model
+    dest: /opt/iris-web/.env
+    remote_src: yes
+
+- name: Pull des images Docker
+  shell: docker compose pull
+  args:
+    chdir: /opt/iris-web
+
+- name: Démarrer DFIR-IRIS avec Docker Compose
+  shell: docker compose up -d
+  args:
+    chdir: /opt/iris-web

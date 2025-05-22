@@ -1,0 +1,39 @@
+{
+  "Event": {
+    "date": "2025-05-02",
+    "threat_level_id": "1",
+    "info": "Mustang Panda APT \u2013 2025 Threat",
+    "analysis": "2",
+    "distribution": "0",
+    "Attribute": [
+      {
+        "category": "Payload delivery",
+        "type": "filename",
+        "value": "mscorsvc.dll",
+        "distribution": "0"
+      },
+      {
+        "category": "Persistence mechanism",
+        "type": "comment",
+        "value": "Scheduled task name: TabletInputServices",
+        "distribution": "0"
+      },
+      {
+        "category": "External analysis",
+        "type": "malware-sample",
+        "value": "ToneShell, StarProxy, PAKLOG, CorKLOG, SplatCloak",
+        "distribution": "0"
+      }
+    ],
+    "Tag": [
+      {
+        "name": "tlp:amber"
+      },
+      {
+        "name": "misp-galaxy:threat-actor=\"Mustang Panda\""
+      }
+    ],
+    "Object": [],
+    "Galaxy": []
+  }
+}

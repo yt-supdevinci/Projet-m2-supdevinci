@@ -1,0 +1,118 @@
+---
+- name: Install and configure Suricata with Emerging Threats rules and Wazuh integration
+  hosts: ubuntu_suricata
+  become: true
+  vars:
+    suricata_repo: "ppa:oisf/suricata-stable"
+    suricata_rules_url: "https://rules.emergingthreats.net/open/suricata-7.0.3/emerging.rules.tar.gz"
+    suricata_rules_dir: "/etc/suricata/rules"
+    suricata_config_file: "/etc/suricata/suricata.yaml"
+    wazuh_ossec_conf: "/var/ossec/etc/ossec.conf"
+    home_net_ip: "192.168.0.34/24"
+    capture_interface: "eth0"
+  tasks:
+
+  - name: Add Suricata APT repository
+    apt_repository:
+      repo: "{{ suricata_repo }}"
+      state: present
+
+  - name: Update APT cache
+    apt:
+      update_cache: yes
+
+  - name: Install Suricata
+    apt:
+      name: suricata
+      state: present
+
+  - name: Download Emerging Threats ruleset
+    get_url:
+      url: "{{ suricata_rules_url }}"
+      dest: "/tmp/emerging.rules.tar.gz"
+
+  - name: Extract rules and move to Suricata directory
+    unarchive:
+      src: "/tmp/emerging.rules.tar.gz"
+      dest: "/tmp/"
+      remote_src: yes
+
+  - name: Create rules directory
+    file:
+      path: "{{ suricata_rules_dir }}"
+      state: directory
+      mode: '0750'
+
+  - name: Move rules to Suricata rules directory
+    copy:
+      src: "/tmp/rules/"
+      dest: "{{ suricata_rules_dir }}/"
+      remote_src: yes
+    register: copy_result
+
+  - name: Clean up temporary rules directory
+    file:
+      path: "/tmp/rules"
+      state: absent
+    when: copy_result is success
+
+  - name: Set permissions on rule files
+    file:
+      path: "{{ item }}"
+      mode: '0640'
+    loop: "{{ lookup('fileglob', suricata_rules_dir + '/*.rules', wantlist=True) }}"
+
+  - name: Backup original suricata.yaml
+    copy:
+      src: "{{ suricata_config_file }}"
+      dest: "{{ suricata_config_file }}.bak"
+      remote_src: yes
+      force: no
+
+  - name: Update Suricata configuration file
+    blockinfile:
+      path: "{{ suricata_config_file }}"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK"
+      block: |
+        vars:
+          HOME_NET: "[{{ home_net_ip }}]"
+          EXTERNAL_NET: "any"
+        rule-files:
+          - "/etc/suricata/rules/*.rules"
+        stats:
+          enabled: yes
+        af-packet:
+          - interface: {{ capture_interface }}
+    notify:
+      - Restart Suricata
+
+  - name: Ensure ossec.conf exists
+    stat:
+      path: "{{ wazuh_ossec_conf }}"
+    register: wazuh_conf
+
+  - name: Add Suricata log monitoring block to Wazuh agent config
+    blockinfile:
+      path: "{{ wazuh_ossec_conf }}"
+      block: |
+        <localfile>
+          <log_format>json</log_format>
+          <location>/var/log/suricata/eve.json</location>
+        </localfile>
+      insertafter: "<ossec_config>"
+    when: wazuh_conf.stat.exists
+    notify:
+      - Restart Wazuh Agent
+
+  handlers:
+    - name: Restart Suricata
+      systemd:
+        name: suricata
+        state: restarted
+        enabled: true
+
+    - name: Restart Wazuh Agent
+      systemd:
+        name: wazuh-agent
+        state: restarted
+        enabled: true

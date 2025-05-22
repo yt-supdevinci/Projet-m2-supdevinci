@@ -1,0 +1,33 @@
+{
+  "Event": {
+    "date": "2025-05-02",
+    "threat_level_id": "1",
+    "info": "Medusa Ransomware \u2013 2025 Threat",
+    "analysis": "2",
+    "distribution": "0",
+    "Attribute": [
+      {
+        "category": "Payload delivery",
+        "type": "comment",
+        "value": "Command observed: wmic shadowcopy delete",
+        "distribution": "0"
+      },
+      {
+        "category": "External analysis",
+        "type": "malware-sample",
+        "value": "Medusa Ransomware",
+        "distribution": "0"
+      }
+    ],
+    "Tag": [
+      {
+        "name": "tlp:amber"
+      },
+      {
+        "name": "misp-galaxy:malware=\"Medusa ransomware\""
+      }
+    ],
+    "Object": [],
+    "Galaxy": []
+  }
+}

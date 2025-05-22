@@ -1,0 +1,23 @@
+[Sat May  3 18:59:33 UTC 2025] MISP installation
+
+[MISP admin user]
+- Admin Username: admin@admin.test
+- Admin Password: LuJGBlotiyW6RVjAEXDYoWzrGH1TFVYH
+- Admin API key: E7TEYweXgxfWvvDO83tZJYit9aoAmgVdZlRUkDY1
+
+[MYSQL ADMIN]
+- Username: root
+- Password: 
+
+[MYSQL MISP]
+- Username: misp
+- Password: uNNCpe8VI9aSTADWgXClTa2l6pIF3mVB
+
+[MISP internal]
+- Path: /var/www/MISP
+- Apache user: www-data
+- GPG Email: admin@admin.test
+- GPG Passphrase: 497e60693e7a441ae3553573039b0ed753441884be1a73b0fa46410e51a93a5f
+- SUPERVISOR_USER: supervisor
+- SUPERVISOR_PASSWORD: L2YTDpPNuLt5yLZKFtMAdu7jHXJP1Gv1
+

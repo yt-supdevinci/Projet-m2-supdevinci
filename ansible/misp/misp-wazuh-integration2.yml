@@ -1,0 +1,97 @@
+---
+- name: Integrate MISP Threat Intelligence into Wazuh
+  hosts: wazuh
+  become: yes
+  gather_facts: no
+
+  vars_files:
+    - vault.yml  # contains: misp_api_key: "YOUR_REAL_KEY"
+
+  vars:
+    misp_api_url: "https://misp.local/attributes/restSearch/"
+    wazuh_integrations: /var/ossec/integrations
+    wazuh_conf: /var/ossec/etc/ossec.conf
+    wazuh_rules: /var/ossec/etc/rules/local_rules.xml
+
+  pre_tasks:
+    - name: Install python3-requests (for the Python script)
+      apt:
+        name: python3-requests
+        state: present
+        update_cache: yes
+
+  tasks:
+    - name: Download custom-misp.py from karelumair's repo
+      get_url:
+        url: https://raw.githubusercontent.com/karelumair/MISP-Wazuh-Integration/main/custom-misp.py
+        dest: "{{ wazuh_integrations }}/custom-misp.py"
+        owner: root
+        group: root
+        mode: '0750'
+
+    - name: Deploy shell wrapper script
+      copy:
+        dest: "{{ wazuh_integrations }}/custom-misp"
+        owner: root
+        group: root
+        mode: '0750'
+        content: |
+          #!/usr/bin/env bash
+          TYPE="$1"
+          LOG="$2"
+          OUTPUT=$(python3 "{{ wazuh_integrations }}/custom-misp.py" "$TYPE" "$LOG" 2>&1)
+          RET=$?
+          echo "$OUTPUT"
+          exit $RET
+
+    - name: Template custom-misp.conf with API URL & key
+      template:
+        src: custom-misp.conf.j2
+        dest: "{{ wazuh_integrations }}/custom-misp.conf"
+        owner: root
+        group: root
+        mode: '0640'
+
+    - name: Inject custom-misp integration into ossec.conf
+      blockinfile:
+        path: "{{ wazuh_conf }}"
+        marker: "<!-- MISP INTEGRATION -->"
+        insertafter: "</global>"
+        block: |
+          <integration>
+            <name>custom-misp</name>
+            <group>syscheck,</group>
+            <alert_format>json</alert_format>
+          </integration>
+
+    - name: Add MISP alert rules to local_rules.xml
+      blockinfile:
+        path: "{{ wazuh_rules }}"
+        marker: "<!-- MISP RULES -->"
+        insertafter: '<group name="ossec,">'
+        block: |
+          <group name="misp,">
+            <rule id="100620" level="10">
+              <field name="integration">custom-misp</field>
+              <description>MISP - IoC found in Threat Intel</description>
+              <options>no_full_log</options>
+            </rule>
+            <rule id="100621" level="5">
+              <if_sid>100620</if_sid>
+              <field name="misp.error">.+</field>
+              <description>MISP - Error connecting to API</description>
+              <group>misp_error,</group>
+            </rule>
+            <rule id="100622" level="12">
+              <if_sid>100620</if_sid>
+              <field name="misp.category">.+</field>
+              <description>MISP - Category: $(misp.category), Value: $(misp.value)</description>
+              <group>misp_alert,</group>
+            </rule>
+          </group>
+
+    - name: Restart Wazuh manager
+      systemd:
+        name: wazuh-manager
+        state: restarted
+        enabled: yes

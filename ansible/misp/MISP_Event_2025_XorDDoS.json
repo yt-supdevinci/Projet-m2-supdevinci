@@ -1,0 +1,39 @@
+{
+  "Event": {
+    "date": "2025-05-02",
+    "threat_level_id": "1",
+    "info": "XorDDoS Linux Botnet \u2013 2025 Threat",
+    "analysis": "2",
+    "distribution": "0",
+    "Attribute": [
+      {
+        "category": "Network activity",
+        "type": "comment",
+        "value": "Observed SSH brute force attacks targeting Linux servers",
+        "distribution": "0"
+      },
+      {
+        "category": "Network activity",
+        "type": "ip-dst",
+        "value": "45.77.12.34",
+        "distribution": "0"
+      },
+      {
+        "category": "External analysis",
+        "type": "malware-sample",
+        "value": "XorDDoS",
+        "distribution": "0"
+      }
+    ],
+    "Tag": [
+      {
+        "name": "tlp:green"
+      },
+      {
+        "name": "misp-galaxy:malware=\"XorDDoS\""
+      }
+    ],
+    "Object": [],
+    "Galaxy": []
+  }
+}

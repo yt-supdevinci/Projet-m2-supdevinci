@@ -1,0 +1,11 @@
+- name: Déployer Shuffle et DFIR-IRIS
+  hosts: all
+  become: yes
+  vars:
+    docker_install_script_url: https://get.docker.com
+  roles:
+    - role: docker_install
+    - role: shuffle
+      when: "'shuffle' in group_names"
+    - role: dfir_iris
+      when: "'dfir_iris' in group_names"
