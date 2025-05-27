@@ -1,6 +1,6 @@
 ---
 - name: Install or reinstall all Wazuh components (Manager, Indexer, Dashboard)
-  hosts: aio
+  hosts: wazuh
   become: yes
   gather_facts: true
   tasks:

@@ -8,18 +8,19 @@
     suricata_rules_dir: "/etc/suricata/rules"
     suricata_config_file: "/etc/suricata/suricata.yaml"
     wazuh_ossec_conf: "/var/ossec/etc/ossec.conf"
-    home_net_ip: "192.168.0.34/24"
+    home_net_ip: "192.168.0.36/24"
     capture_interface: "eth0"
   tasks:
-
-  - name: Add Suricata APT repository
-    apt_repository:
-      repo: "{{ suricata_repo }}"
-      state: present
 
   - name: Update APT cache
     apt:
       update_cache: yes
+
+#  - name: Add Suricata PPA repository
+#    apt_repository:
+#      repo: "{{ suricata_repo }}"
+#      state: present
+
 
   - name: Install Suricata
     apt:
@@ -27,9 +28,14 @@
       state: present
 
   - name: Download Emerging Threats ruleset
-    get_url:
-      url: "{{ suricata_rules_url }}"
-      dest: "/tmp/emerging.rules.tar.gz"
+    ansible.builtin.command: >
+       wget {{ suricata_rules_url }} -O /tmp/emerging.rules.tar.gz
+    args:
+      creates: /tmp/emerging.rules.tar.gz
+
+#    get_url:
+#      url: "{{ suricata_rules_url }}"
+#      dest: "/tmp/emerging.rules.tar.gz"
 
   - name: Extract rules and move to Suricata directory
     unarchive:
@@ -43,18 +49,27 @@
       state: directory
       mode: '0750'
 
-  - name: Move rules to Suricata rules directory
+  - name: Copy rules files to Suricata rules directory
     copy:
       src: "/tmp/rules/"
       dest: "{{ suricata_rules_dir }}/"
+      owner: root
+      group: root
+      mode: '0640'
       remote_src: yes
-    register: copy_result
+
+
+  #  - name: Move rules to Suricata rules directory
+  #    copy:
+  #      src: "/tmp/rules/"
+  #      dest: "{{ suricata_rules_dir }}/"
+  #      remote_src: yes
+  #    register: copy_result
 
   - name: Clean up temporary rules directory
     file:
       path: "/tmp/rules"
       state: absent
-    when: copy_result is success
 
   - name: Set permissions on rule files
     file:

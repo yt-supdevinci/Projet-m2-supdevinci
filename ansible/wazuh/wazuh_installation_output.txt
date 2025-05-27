@@ -1,0 +1,54 @@
+26/05/2025 07:21:55 INFO: Starting Wazuh installation assistant. Wazuh version: 4.12.0
+26/05/2025 07:21:55 INFO: Verbose logging redirected to /var/log/wazuh-install.log
+26/05/2025 07:21:59 INFO: --- Removing existing Wazuh installation ---
+26/05/2025 07:21:59 INFO: Wazuh GPG key not found in the system
+26/05/2025 07:22:00 INFO: Installation cleaned.
+26/05/2025 07:22:00 INFO: Verifying that your system meets the recommended minimum hardware requirements.
+26/05/2025 07:22:00 INFO: Wazuh web interface port will be 443.
+26/05/2025 07:22:04 INFO: --- Dependencies ----
+26/05/2025 07:22:04 INFO: Installing debhelper.
+26/05/2025 07:22:29 INFO: Wazuh repository added.
+26/05/2025 07:22:29 INFO: --- Configuration files ---
+26/05/2025 07:22:29 INFO: Generating configuration files.
+26/05/2025 07:22:29 INFO: Generating the root certificate.
+26/05/2025 07:22:29 INFO: Generating Admin certificates.
+26/05/2025 07:22:29 INFO: Generating Wazuh indexer certificates.
+26/05/2025 07:22:29 INFO: Generating Filebeat certificates.
+26/05/2025 07:22:30 INFO: Generating Wazuh dashboard certificates.
+26/05/2025 07:22:30 INFO: Created wazuh-install-files.tar. It contains the Wazuh cluster key, certificates, and passwords necessary for installation.
+26/05/2025 07:22:30 INFO: --- Wazuh indexer ---
+26/05/2025 07:22:30 INFO: Starting Wazuh indexer installation.
+26/05/2025 07:22:48 INFO: Wazuh indexer installation finished.
+26/05/2025 07:22:48 INFO: Wazuh indexer post-install configuration finished.
+26/05/2025 07:22:48 INFO: Starting service wazuh-indexer.
+26/05/2025 07:23:00 INFO: wazuh-indexer service started.
+26/05/2025 07:23:00 INFO: Initializing Wazuh indexer cluster security settings.
+26/05/2025 07:23:04 INFO: Wazuh indexer cluster security configuration initialized.
+26/05/2025 07:23:04 INFO: Wazuh indexer cluster initialized.
+26/05/2025 07:23:04 INFO: --- Wazuh server ---
+26/05/2025 07:23:04 INFO: Starting the Wazuh manager installation.
+26/05/2025 07:24:05 INFO: Wazuh manager installation finished.
+26/05/2025 07:24:05 INFO: Wazuh manager vulnerability detection configuration finished.
+26/05/2025 07:24:05 INFO: Starting service wazuh-manager.
+26/05/2025 07:24:21 INFO: wazuh-manager service started.
+26/05/2025 07:24:21 INFO: Starting Filebeat installation.
+26/05/2025 07:24:27 INFO: Filebeat installation finished.
+26/05/2025 07:24:28 INFO: Filebeat post-install configuration finished.
+26/05/2025 07:24:28 INFO: Starting service filebeat.
+26/05/2025 07:24:29 INFO: filebeat service started.
+26/05/2025 07:24:29 INFO: --- Wazuh dashboard ---
+26/05/2025 07:24:29 INFO: Starting Wazuh dashboard installation.
+26/05/2025 07:25:22 INFO: Wazuh dashboard installation finished.
+26/05/2025 07:25:22 INFO: Wazuh dashboard post-install configuration finished.
+26/05/2025 07:25:22 INFO: Starting service wazuh-dashboard.
+26/05/2025 07:25:22 INFO: wazuh-dashboard service started.
+26/05/2025 07:25:23 INFO: Updating the internal users.
+26/05/2025 07:25:26 INFO: A backup of the internal users has been saved in the /etc/wazuh-indexer/internalusers-backup folder.
+26/05/2025 07:25:35 INFO: The filebeat.yml file has been updated to use the Filebeat Keystore username and password.
+26/05/2025 07:26:02 INFO: Initializing Wazuh dashboard web application.
+26/05/2025 07:26:03 INFO: Wazuh dashboard web application initialized.
+26/05/2025 07:26:03 INFO: --- Summary ---
+26/05/2025 07:26:03 INFO: You can access the web interface https://<wazuh-dashboard-ip>:443
+    User: admin
+    Password: NGC?FwBFjKRe.Yb0a?rwwUCDCxwgl1T2
+26/05/2025 07:26:03 INFO: Installation finished.

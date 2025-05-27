@@ -34,3 +34,19 @@
   shell: docker compose up -d
   args:
     chdir: /opt/iris-web
+- name: Attendre que les conteneurs soient prêts
+  wait_for:
+    timeout: 60
+  delegate_to: localhost
+
+- name: Extraire les logs administrateur depuis le conteneur IRIS (méthode simple)
+  shell: docker logs $(docker ps -q --filter 'name=iriswebapp_app') 2>&1 | grep -a "administrator"
+  register: iris_admin_logs
+  ignore_errors: yes
+
+- name: Sauvegarder les logs administrateur sur la machine de contrôle
+  copy:
+    content: "{{ iris_admin_logs.stdout }}"
+    dest: "/tmp/iris_admin_logs_{{ inventory_hostname }}_{{ ansible_date_time.epoch }}.txt"
+  delegate_to: localhost
+  when: iris_admin_logs.stdout is defined and iris_admin_logs.stdout != ""
